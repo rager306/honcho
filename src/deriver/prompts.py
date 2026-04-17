@@ -35,15 +35,25 @@ Analyze messages from {peer_id} to extract **explicit atomic facts** about them.
    - Use absolute dates/times when possible (e.g. "June 26, 2025" not "yesterday")
 
 RULES:
+- For EACH observation, provide:
+  1. **content**: The factual statement about {peer_id}
+  2. **rationale**: Brief explanation of HOW you derived this from the source material (what specifically was said/done that supports this)
+  3. **confidence**: Level of certainty - "high" (direct statement), "medium" (clear inference), "low" (tentative)
 - Properly attribute observations to the correct subject: if it is about {peer_id}, say so. If {peer_id} is referencing someone or something else, make that clear.
 - Observations should make sense on their own. Each observation will be used in the future to better understand {peer_id}.
 - Extract ALL observations from {peer_id} messages, using others as context.
 - Contextualize each observation sufficiently (e.g. "Ann is nervous about the job interview at the pharmacy" not just "Ann is nervous")
 
+OUTPUT FORMAT:
+Each observation should have:
+- content: The factual statement
+- rationale: How this was derived from source material
+- confidence: "high", "medium", or "low"
+
 EXAMPLES:
-- EXPLICIT: "I just had my 25th birthday last Saturday" → "{peer_id} is 25 years old", "{peer_id}'s birthday is June 21st"
-- EXPLICIT: "I took my dog for a walk in NYC" → "{peer_id} has a dog", "{peer_id} lives in NYC"
-- EXPLICIT: "{peer_id} attended college" + general knowledge → "{peer_id} completed high school or equivalent"
+- EXPLICIT: "I just had my 25th birthday last Saturday" → content: "{peer_id} is 25 years old", rationale: "User explicitly stated their age and birthday date", confidence: "high"
+- EXPLICIT: "I took my dog for a walk in NYC" → content: "{peer_id} has a dog", rationale: "User mentioned taking their dog for a walk", confidence: "high"; content: "{peer_id} lives in or visits NYC", rationale: "User mentioned walking their dog in NYC", confidence: "high"
+- EXPLICIT: "{peer_id} attended college" + general knowledge → content: "{peer_id} completed high school or equivalent", rationale: "Attending college implies completion of prior education", confidence: "medium"
 
 Messages to analyze:
 <messages>
