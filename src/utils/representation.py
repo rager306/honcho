@@ -139,12 +139,29 @@ class ExplicitObservation(ExplicitObservationBase, ObservationMetadata):
     """Explicit observation with content and metadata."""
 
     def __str__(self) -> str:
-        return f"[{_strip_microseconds_and_timezone(self.created_at)}] {self.content}"
+        base = f"[{_strip_microseconds_and_timezone(self.created_at)}] {self.content}"
+        if self.rationale or self.confidence:
+            details = []
+            if self.rationale:
+                details.append(f"rationale: {self.rationale}")
+            if self.confidence:
+                details.append(f"[{self.confidence}]")
+            return f"{base} ({'; '.join(details)})"
+        return base
 
     def str_with_id(self) -> str:
         """Format with ID prefix for use by agents that need to reference observations."""
         id_prefix = f"[id:{self.id}] " if self.id else ""
-        return f"{id_prefix}[{_strip_microseconds_and_timezone(self.created_at)}] {self.content}"
+        base = f"[{_strip_microseconds_and_timezone(self.created_at)}] {self.content}"
+
+        if self.rationale or self.confidence:
+            details = []
+            if self.rationale:
+                details.append(f"rationale: {self.rationale}")
+            if self.confidence:
+                details.append(f"[{self.confidence}]")
+            return f"{id_prefix}{base} ({'; '.join(details)})"
+        return f"{id_prefix}{base}"
 
     def __hash__(self) -> int:
         """
@@ -537,7 +554,11 @@ class Representation(BaseModel):
                 # Don't need IDs for explicit as these are the lowest level of reasoning.
                 # id_prefix = f"[id:{obs.id}] " if include_ids and obs.id else ""
                 parts.append(f"{obs}")
-            parts.append("")
+                if obs.rationale:
+                    parts.append(f"   *Rationale*: {obs.rationale}")
+                if obs.confidence:
+                    parts.append(f"   *Confidence*: {obs.confidence}")
+                parts.append("")
 
         # Add deductive observations
         if self.deductive:
@@ -675,6 +696,8 @@ class Representation(BaseModel):
             explicit=[
                 ExplicitObservation(
                     content=e.content,
+                    rationale=e.rationale,
+                    confidence=e.confidence,
                     created_at=created_at,
                     message_ids=message_ids,
                     session_name=session_name,
