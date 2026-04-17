@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -58,6 +58,14 @@ class ObservationMetadata(BaseModel):
 
 class ExplicitObservationBase(BaseModel):
     content: str = Field(description="The explicit observation")
+    rationale: Optional[str] = Field(
+        default=None,
+        description="The LLM's reasoning for this observation - how it was derived from the source material",
+    )
+    confidence: Optional[Literal["high", "medium", "low"]] = Field(
+        default=None,
+        description="Confidence level in the observation's accuracy: high (direct statement), medium (reasonable inference), low (tentative conclusion)",
+    )
 
 
 class DeductiveObservationBase(BaseModel):
