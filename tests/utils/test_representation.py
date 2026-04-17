@@ -55,3 +55,52 @@ def test_explicit_observation_confidence_validation():
     for val in ["high", "medium", "low"]:
         obs = ExplicitObservationBase(content="test", confidence=val)
         assert obs.confidence == val
+
+
+def test_prompt_representation_accepts_observation_with_metadata():
+    """PromptRepresentation should accept explicit observations with rationale and confidence."""
+    from src.utils.representation import PromptRepresentation
+
+    prompt_rep = PromptRepresentation(
+        explicit=[
+            ExplicitObservationBase(
+                content="User is 25 years old",
+                rationale="User stated age directly",
+                confidence="high",
+            ),
+            ExplicitObservationBase(
+                content="User likes coffee",
+                rationale=None,  # Optional
+                confidence=None,  # Optional
+            ),
+        ]
+    )
+    assert len(prompt_rep.explicit) == 2
+    assert prompt_rep.explicit[0].rationale == "User stated age directly"
+    assert prompt_rep.explicit[0].confidence == "high"
+    assert prompt_rep.explicit[1].rationale is None
+
+
+def test_prompt_representation_from_llm_response():
+    """Test that PromptRepresentation can be parsed from LLM JSON response."""
+    import json
+    from src.utils.representation import PromptRepresentation
+
+    # Simulate what an LLM might return
+    llm_json = json.dumps({
+        "explicit": [
+            {
+                "content": "User has a dog named Rover",
+                "rationale": "User mentioned their dog Rover multiple times",
+                "confidence": "high",
+            },
+            {
+                "content": "User lives in NYC",
+                "rationale": "User referenced NYC as their location",
+                "confidence": "medium",
+            },
+        ]
+    })
+    # Pydantic should parse this correctly
+    rep = PromptRepresentation.model_validate_json(llm_json)
+    assert len(rep.explicit) == 2
