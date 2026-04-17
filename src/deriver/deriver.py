@@ -215,6 +215,14 @@ async def process_representation_tasks_batch(
     )
 
     if settings.DERIVER.LOG_OBSERVATIONS:
+        # Log thinking_content for debugging/transparency
+        if response.thinking_content:
+            accumulate_metric(
+                f"minimal_deriver_{latest_message.id}_{observed}",
+                "thinking_content",
+                response.thinking_content,
+                "blob",
+            )
         # Log messages fed into deriver
         accumulate_metric(
             f"minimal_deriver_{latest_message.id}_{observed}",
